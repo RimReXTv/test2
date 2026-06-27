@@ -1,0 +1,6 @@
+{
+  "name": "Takium",
+  "description": "Takium is a decentralized, mobile-first cryptocurrency designed by Takeshi Shin for rapid peer-to-peer transactions, mobile mining, and frictionless QR payments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
