@@ -46,11 +46,13 @@ object Consensus {
         val targetTimeTaken = BLOCK_TIME_TARGET_SECONDS * DIFFICULTY_ADJUSTMENT_INTERVAL
 
         // Prevent sudden massive difficulty swings (max +/- 1 change per adjustment window)
-        return when {
+        val calculated = when {
             actualTimeTaken < targetTimeTaken / 2 -> currentDifficulty + 1 // Too fast, increase difficulty
             actualTimeTaken > targetTimeTaken * 2 -> Math.max(1, currentDifficulty - 1) // Too slow, reduce difficulty
             else -> currentDifficulty // Within acceptable range
         }
+        // Limit range between 1 and 3 to keep mobile mining extremely fast and responsive
+        return calculated.coerceIn(1, 3)
     }
 
     /**

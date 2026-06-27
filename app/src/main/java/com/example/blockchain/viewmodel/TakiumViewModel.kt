@@ -94,6 +94,23 @@ class TakiumViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Generates a new high-entropy 12-word BIP-39 mnemonic phrase without saving or initializing yet.
+     */
+    fun generateNewMnemonic(): String {
+        return BIP39.generateMnemonic()
+    }
+
+    /**
+     * Completes setup by saving the confirmed seed phrase to database and loading the wallet.
+     */
+    fun completeWalletSetup(phrase: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            blockchainEngine.dao.insertSetting(SettingEntity("wallet_seed_phrase", phrase))
+            loadWalletFromMnemonic(phrase)
+        }
+    }
+
+    /**
      * Instantiates a new high-entropy 12-word wallet, saving it to settings for persistence.
      */
     fun createNewWallet() {

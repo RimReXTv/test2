@@ -91,221 +91,300 @@ fun TakiumApp(viewModel: TakiumViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(viewModel: TakiumViewModel) {
+    var step by remember { mutableStateOf("welcome") } // welcome, show_seed
     var importText by remember { mutableStateOf("") }
     var showImportDialog by remember { mutableStateOf(false) }
-    var showCreatedBackupDialog by remember { mutableStateOf(false) }
     var newlyCreatedPhrase by remember { mutableStateOf("") }
 
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // App Logo Vector-Like Representation
-        Box(
+    if (step == "show_seed") {
+        Column(
             modifier = Modifier
-                .size(96.dp)
-                .background(Color(0xFFEADDFF), RoundedCornerShape(32.dp))
-                .border(2.dp, Color(0xFFD0BCFF), RoundedCornerShape(32.dp)),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = "Takium Emblem",
-                tint = Color(0xFF21005D),
-                modifier = Modifier.size(48.dp)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Icon Header
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .background(Color(0xFFFEE2E2), RoundedCornerShape(24.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Cüzdan Təhlükəsizliyi",
+                    tint = Color(0xFFB3261E),
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+
+            Text(
+                text = "Toxum Frazası (Seed Phrase)",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Black,
+                color = Color(0xFF1C1B1F),
+                textAlign = TextAlign.Center,
+                lineHeight = 32.sp
             )
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "Aşağıdakı 12 söz cüzdanınızın YEGƏNƏ bərpa açarıdır. Onları kağıza yazın və heç kimlə paylaşmayın. Bu sözlər itərsə, coinləriniz həmişəlik itəcək!",
+                textAlign = TextAlign.Center,
+                fontSize = 13.sp,
+                color = Color(0xFFB3261E),
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
 
-        // Title and Brand Philosophy
-        Text(
-            text = "TAKIUM",
-            fontSize = 38.sp,
-            fontWeight = FontWeight.Black,
-            color = Color(0xFF1C1B1F),
-            letterSpacing = (-1).sp
-        )
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "GENESIS v0.1",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF6750A4),
-            letterSpacing = 2.sp,
-            modifier = Modifier.padding(top = 4.toDp())
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Decentralized, mobile-first cryptocurrency designed by Takeshi Shin for rapid peer-to-peer transactions, mobile mining, and frictionless QR payments.",
-            textAlign = TextAlign.Center,
-            fontSize = 14.sp,
-            color = Color(0xFF49454F),
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Create Wallet Action
-        Card(
-            onClick = {
-                // Generate a random mnemonic dynamically
-                viewModel.createNewWallet()
-                newlyCreatedPhrase = viewModel.mnemonic.value
-                showCreatedBackupDialog = true
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("create_wallet_card"),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFEADDFF)),
-            border = BorderStroke(1.dp, Color(0xFFD0BCFF))
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalAlignment = Alignment.CenterVertically
+            // 12-Word Grid representation
+            val words = newlyCreatedPhrase.split(" ")
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = null,
-                    tint = Color(0xFF21005D),
-                    modifier = Modifier.size(32.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = "Yeni Cüzdan Yarat",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFF21005D)
-                    )
-                    Text(
-                        text = "Təhlükəsiz 12-sözlük BIP-39 toxum frazası ilə",
-                        fontSize = 12.sp,
-                        color = Color(0xFF21005D).copy(alpha = 0.7f)
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Import Wallet Action
-        Card(
-            onClick = { showImportDialog = true },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("import_wallet_card"),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            border = BorderStroke(1.dp, Color(0xFFCAC4D0))
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = null,
-                    tint = Color(0xFF6750A4),
-                    modifier = Modifier.size(32.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = "Mövcud Cüzdanı İdxal Et",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color(0xFF1C1B1F)
-                    )
-                    Text(
-                        text = "Seed frazanı daxil edərək bərpa et",
-                        fontSize = 12.sp,
-                        color = Color(0xFF49454F)
-                    )
-                }
-            }
-        }
-    }
-
-    // Dialog: Created Wallet Backup Reminder
-    if (showCreatedBackupDialog) {
-        AlertDialog(
-            onDismissRequest = { showCreatedBackupDialog = false },
-            title = {
-                Text(
-                    text = "Mnemonic Toxum Frazası",
-                    fontWeight = FontWeight.Black,
-                    fontSize = 18.sp
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        text = "Aşağıdakı 12 sözü təhlükəsiz yerdə saxlayın. Bu fraza itərsə, cüzdanınızdakı coinləri bərpa etmək mümkün olmayacaq!",
-                        fontSize = 13.sp,
-                        color = Color.Red,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-
-                    // Words grid representation
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFFF3EDF7), RoundedCornerShape(16.dp))
-                            .border(1.dp, Color(0xFFCAC4D0), RoundedCornerShape(16.dp))
-                            .padding(16.dp)
+                for (i in 0 until 4) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+                        for (j in 0 until 3) {
+                            val index = i * 3 + j
+                            if (index < words.size) {
+                                Card(
+                                    modifier = Modifier.weight(1f),
+                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF3EDF7)),
+                                    border = BorderStroke(1.dp, Color(0xFFD0BCFF)),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 8.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(
+                                            text = "${index + 1}",
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF6750A4),
+                                            modifier = Modifier
+                                                .background(Color(0xFFEADDFF), RoundedCornerShape(4.dp))
+                                                .padding(horizontal = 4.dp, vertical = 2.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = words[index],
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = Color(0xFF21005D),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Action Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Takium Seed", newlyCreatedPhrase)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "Mnemonic nüsxələndi!", Toast.LENGTH_SHORT).show()
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
+                    border = BorderStroke(1.dp, Color(0xFF6750A4))
+                ) {
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = null, tint = Color(0xFF6750A4))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Nüsxələ", fontWeight = FontWeight.Bold, color = Color(0xFF6750A4))
+                }
+
+                Button(
+                    onClick = {
+                        viewModel.completeWalletSetup(newlyCreatedPhrase)
+                        Toast.makeText(context, "Cüzdan uğurla aktivləşdirildi!", Toast.LENGTH_SHORT).show()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF21005D)),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .weight(1.3f)
+                        .height(52.dp)
+                ) {
+                    Text("Yadda Saxladım", fontWeight = FontWeight.Black, color = Color.White)
+                }
+            }
+
+            TextButton(
+                onClick = { step = "welcome" },
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text("Geri qayıt", color = Color(0xFF49454F))
+            }
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // App Logo Vector-Like Representation
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .background(Color(0xFFEADDFF), RoundedCornerShape(32.dp))
+                    .border(2.dp, Color(0xFFD0BCFF), RoundedCornerShape(32.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "Takium Emblem",
+                    tint = Color(0xFF21005D),
+                    modifier = Modifier.size(48.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Title and Brand Philosophy
+            Text(
+                text = "TAKIUM",
+                fontSize = 38.sp,
+                fontWeight = FontWeight.Black,
+                color = Color(0xFF1C1B1F),
+                letterSpacing = (-1).sp
+            )
+
+            Text(
+                text = "GENESIS v0.2",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF6750A4),
+                letterSpacing = 2.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Dahi Satoshi Nakamotonun fəlsəfəsindən ilhamlanan, tam mərkəzsizləşdirilmiş, mobil mərkəzli P2P yeni nəsil pul sistemi.",
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                color = Color(0xFF49454F),
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Create Wallet Action
+            Card(
+                onClick = {
+                    // Generate mnemonic offline first to display it
+                    newlyCreatedPhrase = viewModel.generateNewMnemonic()
+                    step = "show_seed"
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("create_wallet_card"),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFEADDFF)),
+                border = BorderStroke(1.dp, Color(0xFFD0BCFF))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = null,
+                        tint = Color(0xFF21005D),
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
                         Text(
-                            text = viewModel.mnemonic.value,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF21005D),
-                            lineHeight = 22.sp
+                            text = "Yeni Cüzdan Yarat",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF21005D)
+                        )
+                        Text(
+                            text = "Təhlükəsiz 12-sözlük BIP-39 toxum frazası ilə",
+                            fontSize = 12.sp,
+                            color = Color(0xFF21005D).copy(alpha = 0.7f)
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Button(
-                        onClick = {
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText("Takium Seed", viewModel.mnemonic.value)
-                            clipboard.setPrimaryClip(clip)
-                            Toast.makeText(context, "Mnemonic kopyalandı!", Toast.LENGTH_SHORT).show()
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF21005D)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Kopyala", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { showCreatedBackupDialog = false }
-                ) {
-                    Text("Təsdiq Et", fontWeight = FontWeight.Black, color = Color(0xFF6750A4))
                 }
             }
-        )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Import Wallet Action
+            Card(
+                onClick = { showImportDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("import_wallet_card"),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = BorderStroke(1.dp, Color(0xFFCAC4D0))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        tint = Color(0xFF6750A4),
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "Mövcud Cüzdanı İdxal Et",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF1C1B1F)
+                        )
+                        Text(
+                            text = "Seed frazanı daxil edərək bərpa et",
+                            fontSize = 12.sp,
+                            color = Color(0xFF49454F)
+                        )
+                    }
+                }
+            }
+        }
     }
 
     // Dialog: Import Seed Phrase
