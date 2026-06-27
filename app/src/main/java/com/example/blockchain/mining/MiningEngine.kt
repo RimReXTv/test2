@@ -99,7 +99,7 @@ class MiningEngine(
                 var foundBlock = false
 
                 // Window iteration to allow yielding thread and tracking hashrate accurately
-                for (step in 0 until 1000) {
+                for (step in 0 until 100) {
                     if (!isActive || !_isMining.value) break
 
                     val candidateBlock = Block(
@@ -122,6 +122,15 @@ class MiningEngine(
                         break
                     }
                     nonce++
+
+                    // CPU cooling throttle inside the active hash loop
+                    if (step % 20 == 0) {
+                        if (_batterySafeMode.value) {
+                            delay(12) // 12ms nap to keep CPU chilled
+                        } else {
+                            delay(2)  // 2ms tiny breather to prevent 100% core lockup
+                        }
+                    }
                 }
 
                 // Calculate real-time hashrate
@@ -141,9 +150,9 @@ class MiningEngine(
 
                 // Battery Safe throttle to avoid CPU overheating
                 if (_batterySafeMode.value) {
-                    delay(80) // Rest sleep to keep thermal levels low
+                    delay(120) // Rest sleep to keep thermal levels low
                 } else {
-                    yield() // Simply yield to other coroutines
+                    delay(10) // Maintain a healthy pace to protect hardware
                 }
             }
             _hashRate.value = 0L

@@ -281,7 +281,7 @@ fun OnboardingScreen(viewModel: TakiumViewModel) {
             )
 
             Text(
-                text = "GENESIS v0.2",
+                text = "GENESIS v0.3",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF6750A4),
@@ -1900,6 +1900,202 @@ fun SettingsTab(viewModel: TakiumViewModel) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text("Bütün blockchain tarixçəsini saxlayır və şəbəkəyə dəstək verir.", fontSize = 10.sp, color = Color(0xFF49454F))
                         }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Cryptographic Wallet Credentials Block
+        var keysVisible by remember { mutableStateOf(false) }
+        val mnemonic by viewModel.mnemonic.collectAsStateWithLifecycle()
+        val walletAddress by viewModel.walletAddress.collectAsStateWithLifecycle()
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            border = BorderStroke(1.dp, Color(0xFFCAC4D0))
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "KRİPTOQRAFİK CÜZDAN DETALLARI",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF6750A4),
+                        letterSpacing = 1.sp
+                    )
+                    TextButton(
+                        onClick = { keysVisible = !keysVisible }
+                    ) {
+                        Text(
+                            text = if (keysVisible) "GİZLƏ" else "GÖSTƏR",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = if (keysVisible) Color(0xFFE11D48) else Color(0xFF6750A4)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Public Address
+                Text("Cüzdan Ünvanı (Public Address):", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF49454F))
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF3EDF7), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = walletAddress,
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = Color(0xFF1C1B1F),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(
+                        onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("Address", walletAddress)
+                            clipboard.setPrimaryClip(clip)
+                            Toast.makeText(context, "Ünvan kopyalandı!", Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        Text("Kopyala", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Public Key
+                val pubKeyBase64 = remember(walletAddress) { viewModel.getPublicKeyBase64() }
+                Text("İctimai Açar (Public Key - Base64):", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF49454F))
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF3EDF7), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = if (pubKeyBase64.isNotEmpty()) {
+                            pubKeyBase64.take(24) + "..." + pubKeyBase64.takeLast(10)
+                        } else {
+                            "Yüklənir..."
+                        },
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = Color(0xFF1C1B1F),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(
+                        onClick = {
+                            if (pubKeyBase64.isNotEmpty()) {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("PubKey", pubKeyBase64)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, "İctimai açar kopyalandı!", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ) {
+                        Text("Kopyala", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Private Key
+                val privKeyBase64 = remember(walletAddress) { viewModel.getPrivateKeyBase64() }
+                Text("Gizli Açar (Private Key - Base64):", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF49454F))
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF3EDF7), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = if (keysVisible) {
+                            if (privKeyBase64.isNotEmpty()) {
+                                privKeyBase64.take(18) + "..." + privKeyBase64.takeLast(10)
+                            } else {
+                                "Yüklənir..."
+                            }
+                        } else {
+                            "••••••••••••••••••••••••••••••••"
+                        },
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (keysVisible) Color(0xFFE11D48) else Color(0xFF1C1B1F),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(
+                        onClick = {
+                            if (keysVisible && privKeyBase64.isNotEmpty()) {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("PrivKey", privKeyBase64)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, "Gizli açar kopyalandı!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Əvvəlcə açarları görünən edin!", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ) {
+                        Text("Kopyala", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // BIP-39 Seed Phrase
+                Text("BIP-39 Mnemonic Seed (12 Söz):", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF49454F))
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFF3EDF7), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = if (keysVisible) {
+                            mnemonic
+                        } else {
+                            mnemonic.split(" ").getOrNull(0) + " " + mnemonic.split(" ").getOrNull(1) + " •••••••••••• " + mnemonic.split(" ").lastOrNull()
+                        },
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (keysVisible) Color(0xFF6750A4) else Color(0xFF1C1B1F),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(
+                        onClick = {
+                            if (keysVisible && mnemonic.isNotEmpty()) {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("Mnemonic", mnemonic)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, "Seed phrase kopyalandı!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Əvvəlcə açarları görünən edin!", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ) {
+                        Text("Kopyala", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

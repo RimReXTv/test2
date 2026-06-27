@@ -183,6 +183,22 @@ class TakiumViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Returns the base64 encoded ECDSA Public Key.
+     */
+    fun getPublicKeyBase64(): String {
+        val keyPair = localKeyPair ?: return ""
+        return android.util.Base64.encodeToString(keyPair.public.encoded, android.util.Base64.NO_WRAP)
+    }
+
+    /**
+     * Returns the base64 encoded ECDSA Private Key.
+     */
+    fun getPrivateKeyBase64(): String {
+        val keyPair = localKeyPair ?: return ""
+        return android.util.Base64.encodeToString(keyPair.private.encoded, android.util.Base64.NO_WRAP)
+    }
+
+    /**
      * Toggles Node storage capacity (Full node vs Lite node)
      */
     fun setNodeMode(mode: String) {

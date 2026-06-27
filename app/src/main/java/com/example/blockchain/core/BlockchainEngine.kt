@@ -38,7 +38,7 @@ class BlockchainEngine(
     val blocks: StateFlow<List<Block>> = _blocks
 
     // In-memory UTXO Pool to quickly verify transaction state and calculate balances
-    private val utxoPool = mutableMapOf<String, UTXO>()
+    private val utxoPool = java.util.concurrent.ConcurrentHashMap<String, UTXO>()
 
     // Unconfirmed transactions (Mempool)
     private val _mempool = MutableStateFlow<List<Transaction>>(emptyList())
@@ -145,9 +145,9 @@ class BlockchainEngine(
         }
 
         withContext(Dispatchers.Main) {
-            _blocks.value = blockList
             rebuildUtxoPool(blockList)
             updateDifficulty(blockList)
+            _blocks.value = blockList
         }
 
         // Also load unconfirmed txs (mempool)
